@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="direct_teleop_viking3" name="joy_publisher" type="joy_publisher.py" output="screen"></node>
+    <node pkg="direct_teleop_viking3" name="joy_subscriber" type="joy_subscriber.py" output="screen"></node>
+</launch>
