@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="keyboard_teleop_viking3" name="key_publisher" type="key_publisher.py" output="screen"></node>
+    <node pkg="keyboard_teleop_viking3" name="key_subscriber" type="key_subscriber.py" output="screen"></node>
+</launch>
