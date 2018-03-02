@@ -3,7 +3,7 @@
     <node respawn="true" pkg="joy"
           type="joy_node" name="joypad_controller" >
         <param name="dev" type="string" value="/dev/input/js1" /> <!-- change jsX if needed -->
-        <param name="deadzone" value="0.05" />
+        <param name="deadzone" value="0.0555555555" />
     </node>
     <node pkg="direct_controller_teleop_viking3" name="wheels" type="wheels.py" output="screen"></node>
 </launch>

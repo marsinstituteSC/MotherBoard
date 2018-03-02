@@ -5,49 +5,27 @@ import rospy
 from sensor_msgs.msg import Joy
 
 # Utils
-import can
 import math
-
-# Configure socketcan (python-can)
-bustype = 'socketcan_ctypes'
-channel = 'can0'
-can.rc['interface'] = bustype
-can.rc['channel'] = channel
-
-# CAN bus init
-bus = can.interface.Bus(channel=channel, bustype=bustype)
-# CAN msg preparation. Msg ID is 0x100 for wheel commands
-msg = can.Message(arbitration_id=0x100, data=[], extended_id=False)
-
-# speed fwd, speed reverse,
-# turn radius MSB, turn radius LSB
-values = [0, 0, 255, 255]
+from comms import can_handler
 
 
-# split bytes to MSB and LSB
+# msg ID is 0x100 for wheel commands
+ID = 0x100
+# speed fwd, speed reverse, turn radius MSB, turn radius LSB, turn direction
+values = [0, 0, 255, 255, 0]
+
+
 def split_bytes(val):
 	"""
 	splits bytes for CAN msg
 	reconstruct value with: high * 256 + low
+	param val: 	int16
 	"""
 	high = val // 256	# MSB
 	low = val % 256		# LSB
 	return high, low
 
 
-# send to CAN
-def send_msg(values):
-    	"""
-    	param values: list of raw values
-    	"""
-	msg.data = values
-	try:
-		bus.send(msg)
-	except can.CanError:
-		print('CAN error:', can.CanError)
-
-
-# calculate turn radius. Change s if needed
 def calc_turn_radius(raw, s=0.45):
 	"""
 	param raw:	raw input from joystick
@@ -66,47 +44,60 @@ def calc_turn_radius(raw, s=0.45):
 	except ZeroDivisionError:
 		# no turn angle, infinite turn radius
 		radius = 2**16 - 1
-	# multiplied by 1000 to return millimeters and reduce joystick sensitivity
-	return int(radius * 1000)
+	# multiplied by 100 to return centimeters and reduce joystick sensitivity
+	radius = radius * 100
+	if radius > 2**16 - 1:
+		radius = 2**16 - 1	
+	return int(radius)
 
 
-# handle subscription
 def callback(data):
+	"""
+	param data:	data from ROS joy topic	
+	"""
+	# can_handler.check_status(ID)  # TODO
 	# rospy.loginfo(data) # debug
 	forward = data.axes[4]
 	reverse = data.axes[5]
 	turning = data.axes[0]
 	if forward == 0.0 and reverse == 0.0:
-		# bug: starts at zero. Should be 1.
+		# joy bug: starts at zero. Should be 1.
 		forward = 1.0
 		reverse = 1.0
-	# convert raw data to uniform values wrt. chosen standards
-	values[0] = -int((forward - 1) * 255/2)
-	values[1] = -int((reverse - 1) * 255/2)
+	# convert raw data to uniform values wrt. linux character device values
+	# ROS joy gives float values between -1 and 1, while raw character device values
+	# should be either 16-bit, 8-bit or boolean. 
+	values[0] = -int((forward - 1) * 255/2)  # 8 bit
+	values[1] = -int((reverse - 1) * 255/2)  # 8 bit
 	if turning == 0:
-		# no turn
+		# no turn, infinite turn radius
 		values[2] = 255
 		values[3] = 255
 	else:
 		# turn
-		raw = turning * 65535 / 2
+		raw = -turning * 65535 / 2  # 16 bit
 		turn_radius = calc_turn_radius(raw)
 		tr_MSB, tr_LSB = split_bytes(turn_radius)
 		values[2] = int(tr_MSB)
 		values[3] = int(tr_LSB)
+		if raw < 0:
+			# left turn
+			values[4] = 0
+		elif raw > 0:
+			# right turn
+			values[4] = 1
 	if values[0] != 0 and values[1] != 0:
 		# failsafe: no forward and reverse at same time
 		values[0] = 0
 		values[1] = 0
-	send_msg(values)
+	# send wheel commands to CAN bus
+	can_handler.send_msg(ID, values)
 
 
-
-# subscribe
 def joy_subscriber():
-	# initialize ROS node key_subscriber
+	# initialize ROS node 'wheels'
 	rospy.init_node('wheels')
-	# subscribe to the ROS topic key_events
+	# subscribe to the ROS topic 'joy'
 	rospy.Subscriber('joy', Joy, callback)
 	# keep python from exiting until this node is stopped
 	rospy.spin()
