@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="controller_teleop_viking3" name="joy_publisher" type="joy_publisher.py" output="screen"></node>
+    <node pkg="controller_teleop_viking3" name="wheels" type="wheels.py" output="screen"></node>
+</launch>
