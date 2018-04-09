@@ -1,7 +1,7 @@
-# ROS software for six-wheeled rover.
+# ROS software for Viking 3, a six-wheeled rover.
 
-- control_station: Scripts for control station
+- control_station: Scripts for control station.
 
-- controller_teleop_viking3: Remote teleoperation with gamepad controller through control station.
+- controller_teleop_viking3: ROS package for remote teleoperation with gamepad controller through control station.
 
-- direct_controller_teleop_viking3: Direct teleoperation with gamepad controller over Bluetooth
+- direct_controller_teleop_viking3: ROS package for direct teleoperation with gamepad controller over Bluetooth.
