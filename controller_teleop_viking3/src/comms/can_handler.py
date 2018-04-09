@@ -1,4 +1,6 @@
 import can
+import time
+import threading
 
 # Configure socketcan (python-can)
 bustype = 'socketcan_ctypes'
@@ -7,11 +9,13 @@ can.rc['interface'] = bustype
 can.rc['channel'] = channel
 bus = can.interface.Bus(channel=channel, bustype=bustype)
 
+
 def send_msg(ID, data):
 	"""
 	param ID:   CAN message ID
 	param data: list of data
 	"""
+	global bus
 	msg = can.Message(arbitration_id=ID, data=data, extended_id=False)
 	msg.data = data
 	try:
@@ -19,16 +23,19 @@ def send_msg(ID, data):
 	except can.CanError:
 		print('CAN error:', can.CanError)
 
-def check_status(ID):
+
+def check_status(ID, mutex, received):
 	"""
-	param ID:   CAN message ID
+	param ID:   	CAN message ID
+	param mutex:  	Mutex lock for read buffer
 	"""
-	# TODO: fix decoding
-	for msg in bus:
-	    if msg.arbitration_id == ID:
-	        print('Status of:', ID)
-	        for i in len(msg.data):
-	            print(data[i])
+	global bus
+	msg = bus.recv()
+	if msg and msg.arbitration_id == ID:
+		mutex.acquire()
+		received[time.time()] = list(msg.data)
+		mutex.release()
+
 
 def split_bytes(val, lvl):
 	"""

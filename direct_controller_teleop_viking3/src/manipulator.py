@@ -9,8 +9,8 @@ import math
 from comms import can_handler
 
 
-# msg ID is 0x050 for power commands
-ID = 0x050
+# msg ID is 0x200 for manipulator commands
+ID = 0x200
 
 values = [0, 0, 0, 0]
 
@@ -25,9 +25,9 @@ def callback(data):
 	# can_handler.send_msg(ID, values)
 
 
-def power_control():
-	# initialize ROS node 'power'
-	rospy.init_node('power')
+def manipulator_control():
+	# initialize ROS node 'manipulator'
+	rospy.init_node('manipulator')
 	# subscribe to the ROS topic 'joy'
 	rospy.Subscriber('joy', Joy, callback)
 	# keep python from exiting until this node is stopped
@@ -35,4 +35,4 @@ def power_control():
 
 
 if __name__ == "__main__":
-	power_control()
+	manipulator_control()

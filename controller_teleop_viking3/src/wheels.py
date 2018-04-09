@@ -6,48 +6,96 @@ from std_msgs.msg import String
 
 # Utils
 import json
+import math
+import threading
 from comms import can_handler
 
+# mutex lock
+mutex = threading.Lock()
+
+# CAN bus read buffer: timestamp and data.
+received = {}
 
 # msg ID is 0x100 for wheel commands
 ID = 0x100
 
 # speed MSB, speed LSB,
 # turn radius B1, turn radius B2, turn radius B3, turn radius B4
-values = [0, 0, 255, 255, 255, 255]
+values = [0, 0, 0, 0, 0, 0]
+old_vals = [0, 0, 0, 0, 0, 0]
 
 
 def callback(data):
-	# rospy.loginfo(rospy.get_caller_id() + " heard %s", data.data) # debug
+	"""
+	param data:	data from joy_events topic
+	"""
+	global mutex
+	global received
+	global ID
+	global values
+	global old_vals
+
+	# read CAN bus
+	t = threading.Thread(target=can_handler.check_status, args=(ID, mutex, received)) # TODO: change to drill node status messages
+	t.start()
+
 	data = json.loads(data.data)
 	# print('Controller axes:', data['Axes']) 	# debug
 	# print('Controller buttons:', data['Buttons'])	# debug
 	turning = data['Axes']['0']
 	speed = data['Axes']['1']
+
 	# speed:
 	s_MSB, s_LSB = can_handler.split_bytes(speed, 2)
 	values[0] = int(s_MSB)
 	values[1] = int(s_LSB)
 	# turning:
 	if turning == 0:
-		# no turn, infinite turn radius
-		values[2] = 255
-		values[3] = 255
-		values[4] = 255
-		values[5] = 255
+		# no turn, no turn radius
+		values[2] = 0
+		values[3] = 0
+		values[4] = 0
+		values[5] = 0
 	else:
 		# using 32-bit value for turning radius
 		if turning < 0:
-			turning = turning * (2**16)
+			raw_tr = turning * (2**16)
+			tr = (-2**32-1)/2 + 1 - raw_tr		# reverse axis
+			tr = -int(math.sqrt(math.fabs(tr))) # reduce sensitivity
+			if tr == 0:
+				tr = -1	# turn left on own axis
 		else:
-			turning = (turning + 1) * (2**16) - 1
-		tr_B1, tr_B2, tr_B3, tr_B4 = can_handler.split_bytes(turning, 4)
+			raw_tr = (turning + 1) * (2**16) - 1
+			tr = (2**32-1)/2 - raw_tr			# reverse axis
+			tr = int(math.sqrt(math.fabs(tr))) 	# reduce sensitivity
+			if tr == 0:
+				tr = 1	# turn right on own axis
+		tr_B1, tr_B2, tr_B3, tr_B4 = can_handler.split_bytes(tr, 4)
 		values[2] = int(tr_B1)
 		values[3] = int(tr_B2)
-		values[4] = int(tr_B4)
+		values[4] = int(tr_B3)
 		values[5] = int(tr_B4)
-	# send wheel commands to CAN bus
-	can_handler.send_msg(ID, values)
+
+	# check CAN bus for relevant messages
+	mutex.acquire()
+	try:
+		# check latest relevant msg from wheel nodes
+		latest = received[max(received.keys())]
+	except ValueError:
+		latest = []
+
+	if latest == values:
+		# clear buffer and skip transmission if nodes already have current values
+		received = {}
+		pass
+	else:
+		# send wheel commands to CAN bus
+		if values == old_vals:
+			pass
+		else:
+			old_vals = values[:]
+			can_handler.send_msg(ID, values)
+	mutex.release()
 
 
 def wheel_control():

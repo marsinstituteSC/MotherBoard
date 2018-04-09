@@ -19,11 +19,10 @@ def callback(data):
 	"""
 	param data:	data from ROS joy topic
 	"""
-	# can_handler.check_status(ID)  # TODO
 	# rospy.loginfo(data) # debug
 
 	# send commands to CAN bus
-	can_handler.send_msg(ID, values)
+	# can_handler.send_msg(ID, values)
 
 
 def mast_control():

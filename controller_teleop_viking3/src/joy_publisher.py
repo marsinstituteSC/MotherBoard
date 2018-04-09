@@ -11,10 +11,11 @@ from comms import udpserver
 
 def joy_publisher():
     # initialize ROS node joy_publisher
-    rospy.init_node('joy_publisher') # , anonymous=True
-    # publish key events to the ROS topic joy_events
+    rospy.init_node('joy_publisher')
+    # publish joypad controller events to the ROS topic joy_events
     pub = rospy.Publisher('joy_events', String, queue_size=10)
-    rate = rospy.Rate(10) # 10hz
+    # 10Hz
+    rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():
         data = udpserver.server()

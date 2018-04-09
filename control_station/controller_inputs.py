@@ -1,7 +1,7 @@
 from __future__ import print_function
 from inputs import get_gamepad
 from udp import udpclient
-import sys, time
+import sys, time, threading
 
 # https://pypi.python.org/pypi/inputs
 
@@ -34,9 +34,29 @@ vals = {
 
 # dead zone for joysticks
 dead_zone = 3000
+# thread run flag
+running = True
+# mutex lock for vals
+mutex = threading.Lock()
 
 
-def main(vals):
+def sender():
+    global vals
+    global mutex
+    while True:
+        if running == True:
+            # pass values to server
+            # print('\n', vals)
+            time.sleep(0.05) # 20Hz
+            mutex.acquire()
+            udpclient.send(vals)
+            mutex.release()
+        else:
+            sys.exit()
+
+
+def main():
+    global vals
     while True:
         try:
             events = get_gamepad()
@@ -44,6 +64,7 @@ def main(vals):
             print('\n{}'.format(e))
             sys.exit()
         for event in events:
+            mutex.acquire()
             event_time = event.timestamp
             # Axes:
             if event.ev_type == 'Absolute' or event.ev_type == 'Sync':
@@ -99,19 +120,15 @@ def main(vals):
                     vals['Buttons'][9] = event.state
                 elif event.code == 'BTN_THUMBR':
                     vals['Buttons'][10] = event.state
-        # check if event is still valid
-        if time.time() - event_time > 0.05:
-            continue
-        else:
-            # pass values to server
-            time.sleep(0.05) # 20Hz
-            print('\n', vals)
-            udpclient.send(vals)
+            mutex.release()
 
 
 if __name__ == '__main__':
+    t = threading.Thread(target=sender)
+    t.start()
     try:
-        main(vals)
+        main()
     except KeyboardInterrupt:
+        running = False
         print('\nStopping program.')
         sys.exit()
