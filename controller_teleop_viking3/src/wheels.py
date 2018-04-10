@@ -35,13 +35,12 @@ def callback(data):
 	global values
 	global old_vals
 
+	# fetch data from joy_events
+	data = json.loads(data.data)
 	# read CAN bus
-	t = threading.Thread(target=can_handler.check_status, args=(ID, mutex, received)) # TODO: change to drill node status messages
+	t = threading.Thread(target=can_handler.check_status, args=(ID, mutex, received)) # TODO: change to wheel node status messages
 	t.start()
 
-	data = json.loads(data.data)
-	# print('Controller axes:', data['Axes']) 	# debug
-	# print('Controller buttons:', data['Buttons'])	# debug
 	turning = data['Axes']['0']
 	speed = data['Axes']['1']
 

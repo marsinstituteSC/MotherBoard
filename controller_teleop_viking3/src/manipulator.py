@@ -27,43 +27,39 @@ def callback(data):
 	"""
 	param data:	data from ROS joy topic
 	"""
-	# rospy.loginfo(data) # debug
 	global mutex
 	global received
 	global ID
 	global values
 	global old_vals
 
+	# fetch data from joy_events
 	data = json.loads(data.data)
+	# read CAN bus
+	t = threading.Thread(target=can_handler.check_status, args=(ID, mutex, received)) # TODO: change to manipulator node status messages
+	t.start()
+
 	# print('Controller axes:', data['Axes']) 	    # debug
 	# print('Controller buttons:', data['Buttons'])	# debug
 
-	# read CAN bus
-	t = threading.Thread(target=can_handler.check_status, args=(ID, mutex, received)) # TODO: change to digger node status messages
-	t.start()
-
-	# fetch joypad controller input
-	# drilling = data['Axes']['5']
-
 	# check CAN bus for relevant messages
-	mutex.acquire()
-	try:
-		latest = received[max(received.keys())]	# check latest relevant msg from drill node
-	except ValueError:
-		latest = []
+	with mutex:
+		try:
+			latest = received[max(received.keys())]	# check latest relevant msg from drill node
+		except ValueError:
+			latest = []
 
-	if latest == values:
-		# clear buffer and skip transmission if nodes already have current values
-		received = {}
-		pass
-	else:
-		# send drill commands to CAN bus
-		if values == old_vals:
+		if latest == values:
+			# clear buffer and skip transmission if nodes already have current values
+			received = {}
 			pass
 		else:
-			old_vals = values[:]
-			can_handler.send_msg(ID, values)
-	mutex.release()
+			# send drill commands to CAN bus
+			if values == old_vals:
+				pass
+			else:
+				old_vals = values[:]
+				can_handler.send_msg(ID, values)
 
 
 def manipulator_control():

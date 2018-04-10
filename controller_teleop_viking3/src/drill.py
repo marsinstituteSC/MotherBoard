@@ -28,17 +28,14 @@ def callback(data):
 	"""
 	param data:	data from ROS joy topic
 	"""
-	# rospy.loginfo(data) # debug
 	global mutex
 	global received
 	global ID
 	global values
 	global old_vals
 
+	# fetch data from joy_events
 	data = json.loads(data.data)
-	# print('Controller axes:', data['Axes']) 		# debug
-	# print('Controller buttons:', data['Buttons'])	# debug
-
 	# read CAN bus
 	t = threading.Thread(target=can_handler.check_status, args=(ID, mutex, received)) # TODO: change to drill node status messages
 	t.start()
