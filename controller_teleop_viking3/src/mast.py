@@ -2,9 +2,10 @@
 
 # ROS imports
 import rospy
-from sensor_msgs.msg import Joy
+from std_msgs.msg import String
 
 # Utils
+import json
 import math
 import threading
 from comms import can_handler
@@ -15,15 +16,12 @@ mutex = threading.Lock()
 # CAN bus read buffer: timestamp and data.
 received = {}
 
-# msg ID is 0x250 for drill commands
-ID = 0x250
+# msg ID is 0x150 for mast commands
+ID = 0x150
 
-# clockwise/counter-clockwise, drill speed
-values = [0, 0]
-old_vals = [0, 0]
-
-# flag for calibration/bug fix
-calib = False
+# camera mast tilt - left, right, down, up
+values = [0, 0, 0, 0]
+old_vals = [0, 0, 0, 0]
 
 
 def callback(data):
@@ -36,31 +34,27 @@ def callback(data):
 	global ID
 	global values
 	global old_vals
-	global calib
+
+	data = json.loads(data.data)
 
 	# read CAN bus
 	t = threading.Thread(target=can_handler.check_status, args=(ID, mutex, received)) # TODO: change to drill node status messages
 	t.start()
 
-	# TODO: fix bug
-	if data.axes[4] != 0 and calib == False:
-		calib = True
-
 	# fetch joypad controller input
-	drilling = math.fabs(data.axes[4] - 1)
-	mode = data.buttons[7]
+	left_right = data['Axes']['6']	# tilt left/right
+	up_down = -data['Axes']['7']	# tilt down/up
 
-	if calib == True:
-		if mode == 0:
-			# clockwise
-			values[0] = 0
-			values[1] = int(drilling * ((2**8-1) / 2 + 1))
-		else:
-			# counter-clockwise
-			values[0] = 1
-			values[1] = int(drilling * ((2**8-1) / 2 + 1))
-		if values[1] > 255:
-			values[1] = 255
+	if left_right == -1:
+		values = [255, 0, 0, 0] # tilt left
+	elif left_right == 1:
+		values = [0, 255, 0, 0] # tilt right
+	elif up_down == -1:
+		values = [0, 0, 255, 0] # tilt down
+	elif up_down == 1:
+		values = [0, 0, 0, 255] # tilt up
+	else:
+		values = [0, 0, 0, 0] 	# no tilt
 
 	# check CAN bus for relevant messages
 	with mutex:
@@ -83,14 +77,14 @@ def callback(data):
 				can_handler.send_msg(ID, values)
 
 
-def drill_control():
-	# initialize ROS node 'drill'
-	rospy.init_node('drill')
-	# subscribe to the ROS topic 'joy'
-	rospy.Subscriber('joy', Joy, callback)
+def mast_control():
+	# initialize ROS node 'mast'
+	rospy.init_node('mast')
+	# subscribe to the ROS topic 'joy_events'
+	rospy.Subscriber('joy_events', String, callback)
 	# keep python from exiting until this node is stopped
 	rospy.spin()
 
 
 if __name__ == "__main__":
-	drill_control()
+	mast_control()

@@ -16,8 +16,8 @@ mutex = threading.Lock()
 # CAN bus read buffer: timestamp and data.
 received = {}
 
-# msg ID is 0x250 for drill commands
-ID = 0x250
+# msg ID is 0x050 for power commands
+ID = 0x050
 
 # clockwise/counter-clockwise, drill speed
 values = [0, 0]
@@ -50,29 +50,29 @@ def callback(data):
 	values[1] = drilling
 
 	# check CAN bus for relevant messages
-	with mutex:
-		try:
-			# check latest relevant msg from drill node
-			latest = received[max(received.keys())]
-		except ValueError:
-			latest = []
+	mutex.acquire()
+	try:
+		latest = received[max(received.keys())]	# check latest relevant msg from drill node
+	except ValueError:
+		latest = []
 
-		if latest == values:
-			# clear buffer and skip transmission if nodes already have current values
-			received = {}
+	if latest == values:
+		# clear buffer and skip transmission if nodes already have current values
+		received = {}
+		pass
+	else:
+		# send drill commands to CAN bus
+		if values == old_vals:
 			pass
 		else:
-			# send drill commands to CAN bus
-			if values == old_vals:
-				pass
-			else:
-				old_vals = values[:]
-				can_handler.send_msg(ID, values)
+			old_vals = values[:]
+			can_handler.send_msg(ID, values)
+	mutex.release()
 
 
-def drill_control():
-	# initialize ROS node 'drill'
-	rospy.init_node('drill')
+def power_control():
+	# initialize ROS node 'power'
+	rospy.init_node('power')
 	# subscribe to the ROS topic 'joy_events'
 	rospy.Subscriber('joy_events', String, callback)
 	# keep python from exiting until this node is stopped
@@ -80,4 +80,4 @@ def drill_control():
 
 
 if __name__ == "__main__":
-	drill_control()
+	power_control()

@@ -81,25 +81,24 @@ def callback(data):
 		values[5] = int(tr_B4)
 
 	# check CAN bus for relevant messages
-	mutex.acquire()
-	try:
-		# check latest relevant msg from wheel nodes
-		latest = received[max(received.keys())]
-	except ValueError:
-		latest = []
+	with mutex:
+		try:
+			# check latest relevant msg from wheel nodes
+			latest = received[max(received.keys())]
+		except ValueError:
+			latest = []
 
-	if latest == values:
-		# clear buffer and skip transmission if nodes already have current values
-		received = {}
-		pass
-	else:
-		# send wheel commands to CAN bus
-		if values == old_vals:
+		if latest == values:
+			# clear buffer and skip transmission if nodes already have current values
+			received = {}
 			pass
 		else:
-			old_vals = values[:]
-			can_handler.send_msg(ID, values)
-	mutex.release()
+			# send wheel commands to CAN bus
+			if values == old_vals:
+				pass
+			else:
+				old_vals = values[:]
+				can_handler.send_msg(ID, values)
 
 
 def wheel_control():

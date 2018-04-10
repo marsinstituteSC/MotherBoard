@@ -1,5 +1,11 @@
 <launch>
+    <!-- pulisher node -->
     <node pkg="controller_teleop_viking3" name="joy_publisher" type="joy_publisher.py" output="screen"></node>
+    <!-- subscriber nodes -->
     <node pkg="controller_teleop_viking3" name="wheels" type="wheels.py" output="screen"></node>
     <node pkg="controller_teleop_viking3" name="drill" type="drill.py" output="screen"></node>
+    <node pkg="controller_teleop_viking3" name="digger" type="digger.py" output="screen"></node>
+    <node pkg="controller_teleop_viking3" name="manipulator" type="manipulator.py" output="screen"></node>
+    <node pkg="controller_teleop_viking3" name="mast" type="mast.py" output="screen"></node>
+    <node pkg="controller_teleop_viking3" name="power" type="power.py" output="screen"></node>
 </launch>
