@@ -8,11 +8,11 @@ from sensor_msgs.msg import Joy
 import math
 from comms import can_handler
 
-
 # msg ID is 0x200 for manipulator commands
 ID = 0x200
-
+# manipulator values
 values = [0, 0, 0, 0]
+old_vals = [0, 0, 0, 0]
 
 
 def callback(data):

@@ -16,7 +16,7 @@ def joy_publisher():
     pub = rospy.Publisher('joy_events', String, queue_size=10)
     # 10Hz
     rate = rospy.Rate(10)
-
+    # publish 
     while not rospy.is_shutdown():
         data = udpserver.server()
         pub.publish(data)

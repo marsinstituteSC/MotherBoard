@@ -11,14 +11,11 @@ from comms import can_handler
 
 # mutex lock
 mutex = threading.Lock()
-
 # CAN bus read buffer: timestamp and data.
 received = {}
-
 # msg ID is 0x100 for wheel commands
 ID = 0x100
-
-# Values to be sent onto CAN bus. Speed MSB, speed LSB,
+# speed MSB, speed LSB,
 # turn radius B1, turn radius B2, turn radius B3, turn radius B4
 values = [0, 0, 0, 0, 0, 0]
 old_vals = [0, 0, 0, 0, 0, 0]
@@ -34,15 +31,12 @@ def callback(data):
 	global ID
 	global values
 	global old_vals
-
 	# read CAN bus
 	t = threading.Thread(target=can_handler.check_status, args=(ID, mutex, received)) # TODO: change to wheel node status messages
 	t.start()
-
 	# fetch joypad controller input
 	turning = data.axes[0]**3	# power of 3 to reduce sensitivity
 	speed = data.axes[1]
-
 	# convert raw data to uniform values wrt. linux character device values.
 	# ROS joy gives float values between -1 and 1
 	# speed:
@@ -79,7 +73,6 @@ def callback(data):
 		values[3] = int(tr_B2)
 		values[4] = int(tr_B3)
 		values[5] = int(tr_B4)
-
 	# check CAN bus for relevant messages
 	with mutex:
 		try:

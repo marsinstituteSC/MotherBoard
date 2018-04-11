@@ -6,19 +6,10 @@ from std_msgs.msg import String
 
 # Utils
 import json
-import math
-import threading
 from comms import can_handler
-
-# mutex lock
-mutex = threading.Lock()
-
-# CAN bus read buffer: timestamp and data.
-received = {}
 
 # msg ID is 0x250 for drill commands
 ID = 0x250
-
 # clockwise/counter-clockwise, drill speed
 values = [0, 0]
 old_vals = [0, 0]
@@ -28,43 +19,22 @@ def callback(data):
 	"""
 	param data:	data from ROS joy topic
 	"""
-	global mutex
-	global received
 	global ID
 	global values
 	global old_vals
-
 	# fetch data from joy_events
 	data = json.loads(data.data)
-	# read CAN bus
-	t = threading.Thread(target=can_handler.check_status, args=(ID, mutex, received)) # TODO: change to drill node status messages
-	t.start()
-
-	# fetch joypad controller input
+	# fetch joypad controller input and update values
 	drilling = data['Axes']['5']
 	mode = data['Buttons']['5']
 	values[0] = mode
 	values[1] = drilling
-
-	# check CAN bus for relevant messages
-	with mutex:
-		try:
-			# check latest relevant msg from drill node
-			latest = received[max(received.keys())]
-		except ValueError:
-			latest = []
-
-		if latest == values:
-			# clear buffer and skip transmission if nodes already have current values
-			received = {}
-			pass
-		else:
-			# send drill commands to CAN bus
-			if values == old_vals:
-				pass
-			else:
-				old_vals = values[:]
-				can_handler.send_msg(ID, values)
+	# send drill commands to CAN bus
+	if values == old_vals:
+		pass
+	else:
+		old_vals = values[:]
+		can_handler.send_msg(ID, values)
 
 
 def drill_control():
