@@ -24,17 +24,21 @@ def send_msg(ID, data):
 		print('CAN error:', can.CanError)
 
 
-def check_status(ID, mutex, received):
+def check_status(mutex, buffer, ID=None):
 	"""
 	param ID:   	CAN message ID
 	param mutex:  	Mutex lock for read buffer
 	"""
 	global bus
 	msg = bus.recv()
-	if msg and msg.arbitration_id == ID:
-		mutex.acquire()
-		received[time.time()] = list(msg.data)
-		mutex.release()
+	mutex.acquire()
+	if msg and not ID:
+		# add to general buffer
+		buffer[msg.arbitration_id] = msg.data
+	elif msg and msg.arbitration_id == ID:
+		# add to node-specific buffer
+		buffer[time.time()] = list(msg.data)
+	mutex.release()
 
 
 def split_bytes(val, lvl):

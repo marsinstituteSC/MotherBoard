@@ -34,5 +34,5 @@ def manipulator_control():
 	rospy.spin()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	manipulator_control()

@@ -30,9 +30,7 @@ def callback(data):
 	values[0] = mode
 	values[1] = drilling
 	# send drill commands to CAN bus
-	if values == old_vals:
-		pass
-	else:
+	if values != old_vals:
 		old_vals = values[:]
 		can_handler.send_msg(ID, values)
 
@@ -46,5 +44,5 @@ def drill_control():
 	rospy.spin()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	drill_control()

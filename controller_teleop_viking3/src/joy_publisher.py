@@ -16,14 +16,14 @@ def joy_publisher():
     pub = rospy.Publisher('joy_events', String, queue_size=10)
     # 10Hz
     rate = rospy.Rate(10)
-    # publish 
+    # publish
     while not rospy.is_shutdown():
         data = udpserver.server()
         pub.publish(data)
         rate.sleep()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     try:
         joy_publisher()
     except rospy.ROSInterruptException:

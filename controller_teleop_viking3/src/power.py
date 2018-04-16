@@ -30,9 +30,7 @@ def callback(data):
 	# print('Controller axes:', data['Axes']) 		# debug
 	# print('Controller buttons:', data['Buttons'])	# debug
 	# send power commands to CAN bus
-	if values == old_vals:
-		pass
-	else:
+	if values != old_vals:
 		old_vals = values[:]
 		can_handler.send_msg(ID, values)
 
@@ -46,5 +44,5 @@ def power_control():
 	rospy.spin()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	power_control()

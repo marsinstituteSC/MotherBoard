@@ -59,9 +59,9 @@ def sender():
     global mutex
     global running
     while running:
-        time.sleep(0.05) # 20Hz
+        time.sleep(0.05) # 20 Hz
+        # pass values from control station (client) to rover (server)
         with mutex:
-            # pass values from control station (client) to rover (server)
             udp_client_send(vals)
     sys.exit()
 
@@ -81,60 +81,61 @@ def updater():
             sys.exit()
         for event in events:
             # update controller values
-            with mutex:
-                if event.ev_type == 'Absolute' or event.ev_type == 'Key' or event.ev_type == 'Sync':
-                    # Axes:
-                    if event.code == 'ABS_X':
-                        if event.state > dead_zone or event.state < -dead_zone:
-                            vals['Axes'][0] = event.state
-                        else:
-                            vals['Axes'][0] = 0
-                    elif event.code == 'ABS_Y':
-                        if event.state > dead_zone or event.state < -dead_zone:
-                            vals['Axes'][1] = event.state
-                        else:
-                            vals['Axes'][1] = 0
-                    elif event.code == 'ABS_Z':
-                        vals['Axes'][2] = event.state
-                    elif event.code == 'ABS_RX':
-                        if event.state > dead_zone or event.state < -dead_zone:
-                            vals['Axes'][3] = event.state
-                        else:
-                            vals['Axes'][3] = 0
-                    elif event.code == 'ABS_RY' :
-                        if event.state > dead_zone or event.state < -dead_zone:
-                            vals['Axes'][4] = event.state
-                        else:
-                            vals['Axes'][4] = 0
-                    elif event.code == 'ABS_RZ':
-                        vals['Axes'][5] = event.state
-                    elif event.code == 'ABS_HAT0X':
-                        vals['Axes'][6] = event.state
-                    elif event.code == 'ABS_HAT0Y':
-                        vals['Axes'][7] = event.state
-                    # Buttons:
-                    elif event.code == 'BTN_SOUTH':
-                        vals['Buttons'][0] = event.state
-                    elif event.code == 'BTN_EAST':
-                        vals['Buttons'][1] = event.state
-                    elif event.code == 'BTN_NORTH':
-                        vals['Buttons'][2] = event.state
-                    elif event.code == 'BTN_WEST':
-                        vals['Buttons'][3] = event.state
-                    elif event.code == 'BTN_TL':
-                        vals['Buttons'][4] = event.state
-                    elif event.code == 'BTN_TR':
-                        vals['Buttons'][5] = event.state
-                    elif event.code == 'BTN_SELECT':
-                        vals['Buttons'][6] = event.state
-                    elif event.code == 'BTN_START':
-                        vals['Buttons'][7] = event.state
-                    elif event.code == 'BTN_MODE':
-                        vals['Buttons'][8] = event.state
-                    elif event.code == 'BTN_THUMBL':
-                        vals['Buttons'][9] = event.state
-                    elif event.code == 'BTN_THUMBR':
-                        vals['Buttons'][10] = event.state
+            # Axes:
+            if event.ev_type == 'Absolute' or event.ev_type == 'Sync':
+                if event.code == 'ABS_X':
+                    if event.state > dead_zone or event.state < -dead_zone:
+                        vals['Axes'][0] = event.state
+                    else:
+                        vals['Axes'][0] = 0
+                elif event.code == 'ABS_Y':
+                    if event.state > dead_zone or event.state < -dead_zone:
+                        vals['Axes'][1] = event.state
+                    else:
+                        vals['Axes'][1] = 0
+                elif event.code == 'ABS_Z':
+                    vals['Axes'][2] = event.state
+                elif event.code == 'ABS_RX':
+                    if event.state > dead_zone or event.state < -dead_zone:
+                        vals['Axes'][3] = event.state
+                    else:
+                        vals['Axes'][3] = 0
+                elif event.code == 'ABS_RY' :
+                    if event.state > dead_zone or event.state < -dead_zone:
+                        vals['Axes'][4] = event.state
+                    else:
+                        vals['Axes'][4] = 0
+                elif event.code == 'ABS_RZ':
+                    vals['Axes'][5] = event.state
+                elif event.code == 'ABS_HAT0X':
+                    vals['Axes'][6] = event.state
+                elif event.code == 'ABS_HAT0Y':
+                    vals['Axes'][7] = event.state
+            # Buttons:
+            elif event.ev_type == 'Key' or event.ev_type == 'Sync':
+                if event.code == 'BTN_SOUTH':
+                    vals['Buttons'][0] = event.state
+                elif event.code == 'BTN_EAST':
+                    vals['Buttons'][1] = event.state
+                elif event.code == 'BTN_NORTH':
+                    vals['Buttons'][2] = event.state
+                elif event.code == 'BTN_WEST':
+                    vals['Buttons'][3] = event.state
+                elif event.code == 'BTN_TL':
+                    vals['Buttons'][4] = event.state
+                elif event.code == 'BTN_TR':
+                    vals['Buttons'][5] = event.state
+                elif event.code == 'BTN_SELECT':
+                    vals['Buttons'][6] = event.state
+                elif event.code == 'BTN_START':
+                    vals['Buttons'][7] = event.state
+                elif event.code == 'BTN_MODE':
+                    vals['Buttons'][8] = event.state
+                elif event.code == 'BTN_THUMBL':
+                    vals['Buttons'][9] = event.state
+                elif event.code == 'BTN_THUMBR':
+                    vals['Buttons'][10] = event.state
+        print(vals)
 
 
 if __name__ == '__main__':

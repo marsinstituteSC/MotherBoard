@@ -34,5 +34,5 @@ def power_control():
 	rospy.spin()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	power_control()
