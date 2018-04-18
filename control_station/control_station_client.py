@@ -35,8 +35,6 @@ PORT = 5000
 dead_zone = 3000
 # thread run flag
 running = True
-# mutex lock for vals
-mutex = threading.Lock()
 
 
 def udp_client_send(data):
@@ -61,8 +59,7 @@ def sender():
     while running:
         time.sleep(0.05) # 20 Hz
         # pass values from control station (client) to rover (server)
-        with mutex:
-            udp_client_send(vals)
+        udp_client_send(vals)
     sys.exit()
 
 def updater():
