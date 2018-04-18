@@ -13,8 +13,8 @@ def callback(data):
 	"""
 	status = json.loads(data.data)
 	print('\nCAN bus status:')
-	for k in status:
-		print('\t%s: %s' % (hex(int(str(k))), status[k]))
+	for k in sorted(status):
+		print('\t%s:\t%s' % (hex(int(k)), status[k]))
 
 
 def can_read_sub():

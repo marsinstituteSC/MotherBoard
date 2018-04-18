@@ -35,6 +35,8 @@ PORT = 5000
 dead_zone = 3000
 # thread run flag
 running = True
+# mutex lock for vals
+mutex = threading.Lock()
 
 
 def udp_client_send(data):
@@ -59,7 +61,9 @@ def sender():
     while running:
         time.sleep(0.05) # 20 Hz
         # pass values from control station (client) to rover (server)
-        udp_client_send(vals)
+        with mutex:
+            # print(vals)
+            udp_client_send(vals)
     sys.exit()
 
 def updater():
@@ -76,8 +80,8 @@ def updater():
             print('\n{}'.format(e))
             running = False
             sys.exit()
+        # update controller values
         for event in events:
-            # update controller values
             # Axes:
             if event.ev_type == 'Absolute' or event.ev_type == 'Sync':
                 if event.code == 'ABS_X':
@@ -132,7 +136,6 @@ def updater():
                     vals['Buttons'][9] = event.state
                 elif event.code == 'BTN_THUMBR':
                     vals['Buttons'][10] = event.state
-        print(vals)
 
 
 if __name__ == '__main__':
