@@ -2,12 +2,17 @@
     <!-- pulisher nodes -->
     <node pkg="controller_teleop_viking3" name="joy_publisher" type="joy_publisher.py" output="screen"></node>
     <node pkg="controller_teleop_viking3" name="can_read_pub" type="can_read_pub.py" output="screen"></node>
+    <!-- zed wrapper -->
+    <include file="$(find zed_wrapper)/launch/zed.launch" />
     <!-- subscriber nodes -->
     <node pkg="controller_teleop_viking3" name="wheels" type="wheels.py" output="screen"></node>
     <node pkg="controller_teleop_viking3" name="can_read_sub" type="can_read_sub.py" output="screen"></node>
+    <node pkg="controller_teleop_viking3" name="zed_sub" type="zed_sub.py" output="screen"></node>
     <node pkg="controller_teleop_viking3" name="drill" type="drill.py" output="screen"></node>
     <node pkg="controller_teleop_viking3" name="digger" type="digger.py" output="screen"></node>
     <node pkg="controller_teleop_viking3" name="manipulator" type="manipulator.py" output="screen"></node>
     <node pkg="controller_teleop_viking3" name="mast" type="mast.py" output="screen"></node>
     <node pkg="controller_teleop_viking3" name="power" type="power.py" output="screen"></node>
+    <!-- Flask app for video feed -->
+    <node pkg="controller_teleop_viking3" name="stream" type="stream.py" output="screen"></node>
 </launch>
