@@ -26,7 +26,7 @@ def callback(data):
 	# cv2.waitKey(3)
 
 
-def power_control():
+def zed_sub():
 	# initialize ROS node 'zed_sub'
 	rospy.init_node('zed_sub')
 	# subscribe to the ROS topic 'zed/rgb/image_rect_color'
@@ -39,4 +39,4 @@ def power_control():
 
 
 if __name__ == '__main__':
-	power_control()
+	zed_sub()
