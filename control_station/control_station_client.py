@@ -59,9 +59,10 @@ def sender():
     global mutex
     global running
     while running:
-        time.sleep(0.05) # 20 Hz
+        time.sleep(0.02) # 50 Hz
         # pass values from control station (client) to rover (server)
         with mutex:
+            # print(vals)
             udp_client_send(vals)
     sys.exit()
 
@@ -79,8 +80,8 @@ def updater():
             print('\n{}'.format(e))
             running = False
             sys.exit()
+        # update controller values
         for event in events:
-            # update controller values
             # Axes:
             if event.ev_type == 'Absolute' or event.ev_type == 'Sync':
                 if event.code == 'ABS_X':
@@ -135,7 +136,6 @@ def updater():
                     vals['Buttons'][9] = event.state
                 elif event.code == 'BTN_THUMBR':
                     vals['Buttons'][10] = event.state
-        print(vals)
 
 
 if __name__ == '__main__':

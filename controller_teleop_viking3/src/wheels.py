@@ -7,7 +7,6 @@ from std_msgs.msg import String
 # Utils
 import json
 import math
-import threading
 from comms import can_handler
 
 # msg ID is 0x100 for wheel commands

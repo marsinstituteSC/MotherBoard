@@ -12,20 +12,15 @@ def server():
 		# setup socket
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		s.bind((HOST, PORT))
-		# look for data
+		# listen for data
 		data, addr = s.recvfrom(1024)
+		if data:
+			# decode bytes
+			data = data.decode('UTF-8')
+			return data
 	except socket.error as e:
 		print('Exiting or unable to create socket')
 		print(e)
 		sys.exit()
-	if data:
-		# decode bytes
-		data = data.decode('UTF-8')
-		return data
-	else:
-		pass
-
-
-if __name__ == '__main__':
-	while True:
-		server()
+	finally:
+		s.close()

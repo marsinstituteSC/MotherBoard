@@ -25,9 +25,9 @@ def callback(data):
 	# fetch data from joy_events
 	data = json.loads(data.data)
 	# fetch joypad controller input and update values
-	drilling = data['Axes']['5']
-	mode = data['Buttons']['5']
-	values[0] = mode
+	drilling = data['Axes']['5']		# drilling speed
+	direction = data['Buttons']['5']	# normal/reverse
+	values[0] = direction
 	values[1] = drilling
 	# send drill commands to CAN bus
 	if values != old_vals:

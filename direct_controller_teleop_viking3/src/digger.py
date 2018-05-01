@@ -11,18 +11,28 @@ from comms import can_handler
 # msg ID is 0x300 for digger commands
 ID = 0x300
 # digger values
-values = [0, 0, 0, 0]
-old_vals = [0, 0, 0, 0]
+values = [0, 0]
+old_vals = [0, 0]
 
 
 def callback(data):
 	"""
 	param data:	data from ROS joy topic
 	"""
-	# rospy.loginfo(data) # debug
-
-	# send commands to CAN bus
-	# can_handler.send_msg(ID, values)
+	global ID
+	global values
+	global old_vals
+	# fetch joypad controller input and update values
+	direction = data.buttons[6]
+	digging = math.fabs(data.axes[5] - 1)
+	values[0] = direction
+	values[1] = int(digging * ((2**8-1) / 2 + 1))
+	if values[1] > 255:
+		values[1] = 255
+	# send digger commands to CAN bus
+	if values != old_vals:
+		old_vals = values[:]
+		can_handler.send_msg(ID, values)
 
 
 def digger_control():

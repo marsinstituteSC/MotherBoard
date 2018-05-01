@@ -19,8 +19,8 @@ def can_read_pub():
 	rospy.init_node('can_read_publisher')
 	# publish joypad controller events to the ROS topic CAN_statuses
 	pub = rospy.Publisher('CAN_statuses', String, queue_size=10)
-	# 1000Hz
-	rate = rospy.Rate(1000)
+	# 100Hz
+	rate = rospy.Rate(100)
 	# publish
 	while not rospy.is_shutdown():
 		can_handler.check_status(mutex, statuses)

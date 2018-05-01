@@ -6,7 +6,6 @@ from sensor_msgs.msg import Joy
 
 # Utils
 import math
-import threading
 from comms import can_handler
 
 # msg ID is 0x100 for wheel commands

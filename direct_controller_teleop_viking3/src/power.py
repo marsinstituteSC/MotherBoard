@@ -11,18 +11,30 @@ from comms import can_handler
 # msg ID is 0x050 for power commands
 ID = 0x050
 # power values
-values = [0, 0]
-old_vals = [0, 0]
+values = []
+old_vals = []
 
 
 def callback(data):
 	"""
 	param data:	data from ROS joy topic
 	"""
-	# rospy.loginfo(data) # debug
-
-	# send commands to CAN bus
-	# can_handler.send_msg(ID, values)
+	global ID
+	global values
+	global old_vals
+	# fetch joypad controller input
+	option = data.buttons[11]
+	green = data.buttons[0]
+	red = data.buttons[1]
+	if option == 1:
+		if green == 1:
+			values = [0xFF] 	# full power
+		elif red == 1:
+			values = [0x00] 	# sleep mode
+		# send commands to CAN bus
+		if values != old_vals:
+			old_vals = values
+			can_handler.send_msg(ID, values)
 
 
 def power_control():
