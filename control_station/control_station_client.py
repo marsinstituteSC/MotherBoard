@@ -59,7 +59,7 @@ def sender():
     global mutex
     global running
     while running:
-        time.sleep(0.05) # 20 Hz
+        time.sleep(0.02) # 50 Hz
         # pass values from control station (client) to rover (server)
         with mutex:
             # print(vals)

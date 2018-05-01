@@ -2,7 +2,7 @@
 
 # https://blog.miguelgrinberg.com/post/video-streaming-with-flask
 
-from flask import Flask, render_template, Response
+from flask import Flask, Response
 import time
 
 app = Flask(__name__)

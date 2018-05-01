@@ -1,6 +1,5 @@
 import can
 import time
-import threading
 
 # Configure socketcan (python-can)
 bustype = 'socketcan_ctypes'
@@ -27,18 +26,18 @@ def send_msg(ID, data):
 def check_status(mutex, buffer, ID=None):
 	"""
 	param ID:   	CAN message ID
+	param buffer:   Read buffer
 	param mutex:  	Mutex lock for read buffer
 	"""
 	global bus
 	msg = bus.recv()
-	mutex.acquire()
-	if msg and not ID:
-		# add to general buffer
-		buffer[msg.arbitration_id] = msg.data
-	elif msg and msg.arbitration_id == ID:
-		# add to node-specific buffer
-		buffer[time.time()] = list(msg.data)
-	mutex.release()
+	with mutex:
+		if msg and not ID:
+			# add to general buffer
+			buffer[msg.arbitration_id] = msg.data
+		elif msg and msg.arbitration_id == ID:
+			# add to node-specific buffer
+			buffer[time.time()] = list(msg.data)
 
 
 def split_bytes(val, lvl):

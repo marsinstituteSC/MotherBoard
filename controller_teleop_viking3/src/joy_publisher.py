@@ -14,8 +14,8 @@ def joy_publisher():
     rospy.init_node('joy_publisher')
     # publish joypad controller events to the ROS topic joy_events
     pub = rospy.Publisher('joy_events', String, queue_size=10)
-    # 10Hz
-    rate = rospy.Rate(10)
+    # 100 Hz
+    rate = rospy.Rate(100)
     # publish
     while not rospy.is_shutdown():
         data = udpserver.server()

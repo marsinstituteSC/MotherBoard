@@ -10,9 +10,9 @@ from comms import can_handler
 
 # msg ID is 0x200 for manipulator commands
 ID = 0x200
-# manipulator values
-values = [0, 0, 0, 0]
-old_vals = [0, 0, 0, 0]
+# link select, rise MSB, rise LSB, sway MSB, sway LSB
+values = [0, 0, 0, 0, 0]
+old_vals = [0, 0, 0, 0, 0]
 
 
 def callback(data):
@@ -25,8 +25,13 @@ def callback(data):
 
 	# fetch data from joy_events
 	data = json.loads(data.data)
-	# print('Controller axes:', data['Axes']) 	    # debug
-	# print('Controller buttons:', data['Buttons'])	# debug
+	# fetch joypad controller input
+	link_select = data['Buttons']['7']
+	rise = data['Axes']['3']
+	sway = data['Axes']['4']
+	r1, r2 = can_handler.split_bytes(rise, 2)
+	s1, s2 = can_handler.split_bytes(sway, 2)
+	values = [link_select, r1, r2, s1, s2]
 	# send manipulator commands to CAN bus
 	if values != old_vals:
 		old_vals = values[:]

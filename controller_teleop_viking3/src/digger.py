@@ -10,9 +10,9 @@ from comms import can_handler
 
 # msg ID is 0x300 for digger commands
 ID = 0x300
-# digger values
-values = [0, 0, 0, 0]
-old_vals = [0, 0, 0, 0]
+# dig normal/reverse, digger speed
+values = [0, 0]
+old_vals = [0, 0]
 
 
 def callback(data):
@@ -22,11 +22,13 @@ def callback(data):
 	global ID
 	global values
 	global old_vals
-
 	# fetch data from joy_events
 	data = json.loads(data.data)
-	# print('Controller axes:', data['Axes']) 	    # debug
-	# print('Controller buttons:', data['Buttons'])	# debug
+	# fetch joypad controller input and update values
+	direction = data['Buttons']['4']	# normal/reverse
+	digging = data['Axes']['2']			# digging speed
+	values[0] = direction
+	values[1] = digging
 	# send digger commands to CAN bus
 	if values != old_vals:
 		old_vals = values[:]

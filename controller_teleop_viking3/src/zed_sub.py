@@ -21,7 +21,7 @@ def callback(data):
 		cv2.imwrite('frame.jpeg', cv_img)
 	except CvBridgeError as e:
 		print(e)
-	# show image stream
+	# show image stream on on-board computer:
 	# cv2.imshow('zed', cv_img)
 	# cv2.waitKey(3)
 

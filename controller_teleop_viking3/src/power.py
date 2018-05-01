@@ -11,8 +11,8 @@ from comms import can_handler
 # msg ID is 0x050 for power commands
 ID = 0x050
 # power values
-values = [0, 0]
-old_vals = [0, 0]
+values = []
+old_vals = []
 
 
 def callback(data):
